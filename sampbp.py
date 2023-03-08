@@ -6,7 +6,7 @@ import subprocess
 import uuid
 
 from os import makedirs, remove, getcwd
-from os.path import join, basename
+from os.path import join, basename, exists
 
 PROJECT_NAME = basename(getcwd())
 
@@ -24,7 +24,9 @@ SCRIPTFILES_DIR = "scriptfiles"
 SAMP_SERVER_FILENAME = "samp-server.exe"
 COMPILER_FILENAME = "pawncc.exe"
 COMPILER_DLL_FILENAME = "pawnc.dll"
+SERVER_LOG_FILENAME = "server_log.txt"
 MAIN_ENTRY_FILENAME = f"{PROJECT_NAME}.pwn"
+MAIN_ENTRY_DIST_FILENAME = f"{PROJECT_NAME}.amx"
 SERVER_CONFIG_FILENAME = "server.cfg"
 RESOURCES_FILENAME = "resources.zip"
 A_ACTOR_INC_FILENAME = "a_actor.inc"
@@ -48,7 +50,8 @@ TIME_INC_FILENAME = "time.inc"
 COMPILER_PATH = join(COMPILER_DIR, COMPILER_FILENAME)
 COMPILER_DLL_PATH = join(COMPILER_DIR, COMPILER_DLL_FILENAME)
 MAIN_ENTRY_PATH = join(SOURCE_DIR, MAIN_ENTRY_FILENAME)
-MAIN_ENTRY_DIST_PATH = join(DIST_DIR, MAIN_ENTRY_FILENAME)
+MAIN_ENTRY_PATH_IN_DIST = join(DIST_DIR, MAIN_ENTRY_FILENAME)
+MAIN_ENTRY_DIST_PATH = join(DIST_DIR, MAIN_ENTRY_DIST_FILENAME)
 RESOURCES_TEMP_PATH = join(SAMPBP_DIR, RESOURCES_FILENAME)
 A_ACTOR_INC_PATH = join(INCLUDE_DIR, A_ACTOR_INC_FILENAME)
 A_HTTP_INC_PATH = join(INCLUDE_DIR, A_HTTP_INC_FILENAME)
@@ -216,13 +219,19 @@ def init():
     build()
 
 def run():
+    if not exists(MAIN_ENTRY_DIST_PATH):
+        print("Main entry script not found.")
+        exit()
     subprocess.run([SAMP_SERVER_FILENAME])
 
 def build():
+    if not exists(MAIN_ENTRY_PATH):
+        print("Main entry script not found.")
+        exit()
     print(f"Building {PROJECT_NAME}...")
-    shutil.copyfile(MAIN_ENTRY_PATH, MAIN_ENTRY_DIST_PATH)
+    shutil.copyfile(MAIN_ENTRY_PATH, MAIN_ENTRY_PATH_IN_DIST)
     subprocess.run([COMPILER_PATH, f"-D{DIST_DIR}", MAIN_ENTRY_FILENAME])
-    remove(MAIN_ENTRY_DIST_PATH)
+    remove(MAIN_ENTRY_PATH_IN_DIST)
 
 def clean():
     print("Cleaning project...")
@@ -233,8 +242,18 @@ def clean():
     shutil.rmtree(PLUGINS_DIR, ignore_errors=True)
     shutil.rmtree(SCRIPTFILES_DIR, ignore_errors=True)
     shutil.rmtree(SOURCE_DIR, ignore_errors=True)
-    remove(SAMP_SERVER_FILENAME)
-    remove(SERVER_CONFIG_FILENAME)
+    try:
+        remove(SAMP_SERVER_FILENAME)
+    except FileNotFoundError:
+        pass
+    try:
+        remove(SERVER_CONFIG_FILENAME)
+    except FileNotFoundError:
+        pass
+    try:
+        remove(SERVER_LOG_FILENAME)
+    except FileNotFoundError:
+        pass
 
 def main(args):
     if args.command == "init":
