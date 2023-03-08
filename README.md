@@ -13,3 +13,6 @@ Run project.
 
 ### Clean
 Clean project.
+
+## Why not use sampctl?
+Just easy and fast.

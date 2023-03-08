@@ -217,6 +217,7 @@ def init():
     install_server_resources()
     remove_temporary_files()
     build()
+    print("Use sampbp build or sampbp run for developing.")
 
 def run():
     if not exists(MAIN_ENTRY_DIST_PATH):
