@@ -1,5 +1,10 @@
 # SAMP Boilerplate Generator
 
+## Install & Usage
+* Clone this repo;
+* Open cloned directory;
+* Write *py sampbp.py init*
+
 ## Commands
 
 ### Init
